@@ -4,12 +4,19 @@
 // File name: projects/2/FullAdder.hdl
 /**
  * Computes the sum of three bits.
+ *    Half adder:
+ *    IN  a, b;   // 1-bit inputs
+ *    OUT sum,    // Right bit of a + b
+ *        carry;  // Left bit of a + b
  */
+
 CHIP FullAdder {
-    IN a, b, c;  // 1-bit inputs
+    IN a, b, c;  // 1-bit inputs, c is the carry
     OUT sum,     // Right bit of a + b + c
         carry;   // Left bit of a + b + c
 
     PARTS:
-    //// Replace this comment with your code.
+    HalfAdder(a=a, b=b, sum=sumab, carry=carryab);
+    HalfAdder(a=c, b=sumab, sum=sum, carry=carrycsumab);
+    Or(a=carryab, b=carrycsumab, out=carry);
 }
