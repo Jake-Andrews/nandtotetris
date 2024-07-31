@@ -6,5 +6,29 @@
 // Multiplies R0 and R1 and stores the result in R2.
 // (R0, R1, R2 refer to RAM[0], RAM[1], and RAM[2], respectively.)
 // The algorithm is based on repetitive addition.
+    @R2
+    M=0
+    @count
+    M=0
 
-//// Replace this comment with your code.
+(LOOP)
+    @count
+    D=M
+    @R1
+    D=D-M
+    @END
+    D;JEQ
+
+    @R0
+    D=M
+    @R2
+    M=M+D
+    @count
+    M=M+1
+    @LOOP
+    0;JMP
+
+(END)
+    @END
+    0;JMP
+

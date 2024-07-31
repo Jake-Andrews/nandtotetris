@@ -1,0 +1,23 @@
+The A-instruction - A for addressing
+Syntax: @value
+    - Non-negative constant
+    - Symbol referring to a constant
+    - Sets the A register to value
+    - RAM[A] becomes the selected RAM register
+Ex:
+    - @21
+    - RAM[21] becomes the selected RAM register
+
+    - @100 // Sets A to 100
+    - M=-1 // Sets RAM[100] to -1
+
+    - @# sets the RAM[#] to the active register
+    - Then M is the active register so M=D sets RAM[#] to D
+    - and A is still # since the value in A is an address
+
+The C-instruction
+Syntax: dest = comp ; jump //dest & jump are optional
+        comp can = a ton...look it up
+        dest can = null, M, D, MD, A, AM, AD, AMD
+        // M refers to RAM[A]
+        jump can = null, JGT, JEQ, JGE, JLT, JNE, JLE, JMP
