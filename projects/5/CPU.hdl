@@ -17,7 +17,16 @@
  * instruction's execution during the current cycle. The addressM and pc outputs are
  * clocked: although they are affected by the instruction's execution, they commit to
  * their new values only in the next cycle.
+
+ - instruction - read memory : inM contains value at memory
+ - instruction - write memory : outM to value, addressM to target address,
+ writeM
+ - reset is 0 : get address of next instruction, set pc to that
+ - reset is 1 : set pc to 0
+ -
  */
+
+
 CHIP CPU {
 
     IN  inM[16],         // M value input  (M = contents of RAM[A])
@@ -27,10 +36,46 @@ CHIP CPU {
                          // the current program (reset==0).
 
     OUT outM[16],        // M value output
-        writeM,          // Write to M? 
+        writeM,          // Write to M?
         addressM[15],    // Address in data memory (of M)
         pc[15];          // address of next instruction
 
     PARTS:
-	//// Replace this comment with your code.
+    // A Register
+    Mux16(a=instruction, b=ALUout, sel=instruction[15], out=aInput);
+    Not(in=instruction[15], out=notinstr15);
+    Or(a=instruction[5], b=notinstr15, out=aLoad);
+    ARegister(in=aInput, load=aLoad, out=aOut);
+    Or16(a=aOut, b=false, out[0..14]=addressM, out[15]=false);
+
+    // D Register
+    And(a=instruction[15], b=instruction[4], out=dLoad);
+    DRegister(in=ALUout, load=dLoad, out=dOut);
+
+    // ALU
+    Mux16(a=aOut, b=inM, sel=instruction[12], out=aluY);
+    ALU(x=dOut, y=aluY, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6],
+        out=ALUout, out=outM, zr=zr, ng=ng);
+
+    // MemWrite
+    And(a=instruction[15], b=instruction[3], out=writeM);
+
+    // Jump
+    And(a=instruction[15], b=instruction[2], out=jNeg);
+    And(a=instruction[15], b=instruction[1], out=jZero);
+    And(a=instruction[15], b=instruction[0], out=jPos);
+
+    Not(in=zr, out=notZr);
+    Not(in=ng, out=notNg);
+    And(a=notZr, b=notNg, out=isPos);
+
+    And(a=jNeg, b=ng, out=jumpNeg);
+    And(a=jZero, b=zr, out=jumpZero);
+    And(a=jPos, b=isPos, out=jumpPos);
+
+    Or(a=jumpNeg, b=jumpZero, out=jumpCond1);
+    Or(a=jumpCond1, b=jumpPos, out=jump);
+
+    // PC
+    PC(in=aOut, reset=reset, load=jump, inc=true, out[0..14]=pc);
 }
